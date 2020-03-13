@@ -22,5 +22,22 @@ const createElement = (
     } as VDOM
 }
 
+const renderElementNode = (vNode: VDOM) => {
+    const $el = document.createElement(vNode.tagName)
+    Object
+        .keys(vNode.attrs)
+        .forEach(key => {
+            $el.setAttribute(key, (vNode.attrs as any)[key])
+        })
+    for (const child of vNode.children) {
+        $el.appendChild(renderElementNode(child))
+    }
+    return $el
+}
 
-export { createElement }
+const render = (vNode: VDOM) => {
+
+}
+
+
+export { createElement, renderElementNode }
