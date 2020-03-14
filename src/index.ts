@@ -1,17 +1,34 @@
-import { createElement, renderElementNode } from './vdom'
+import { createElement, render, mount, diff } from './vdom'
 
-const vApp = createElement('div', {
+
+const createvApp = (count: number) => createElement('div', {
     attrs: {
-        id: 2
+        id: 2,
+        dataCount: count
     },
     children: [
+        'Hello,World',
+        String(count),
         createElement('img', {
             attrs: {
-                src: 'xxx.com'
+                src: 'https://media.giphy.com/media/cuPm4p4pClZVC/giphy.gif'
             }
         })
     ]
 })
 
-console.log(vApp)
-console.log(renderElementNode(vApp))
+
+
+
+let vApp = createvApp(0)
+const $app = render(vApp)
+let $rootEl = mount($app, document.querySelector('#app'))
+
+setInterval(() => {
+    const n = Math.floor(Math.random() * 10)
+    const vNewApp = createvApp(n);
+    const patch = diff(vApp, vNewApp)
+    $rootEl = patch($rootEl) as HTMLElement | Text
+    vApp = vNewApp
+}, 1000)
+
