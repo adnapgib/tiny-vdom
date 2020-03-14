@@ -11,7 +11,7 @@ const createvApp = (count: number) => createElement('div', {
         String(count),
         createElement('img', {
             attrs: {
-                src: 'https://media.giphy.com/media/cuPm4p4pClZVC/giphy.gif'
+                src: 'https://images.unsplash.com/photo-1584135034886-36cfdd7b19ec?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60'
             }
         })
     ]
