@@ -1,10 +1,10 @@
-import { createElement, render, mount, diff } from './vdom'
+import { createElement, render, mount, diff } from './VDOM/VDOM'
+
 
 
 const createvApp = (count: number) => createElement('div', {
     attrs: {
         id: 2,
-        dataCount: count
     },
     children: [
         'Hello,World',

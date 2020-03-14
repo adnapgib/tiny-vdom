@@ -1,69 +1,10 @@
-interface VElementNode {
-    tagName: string
-    attrs: object
-    children: Array<VNode>
-}
-
-type VNode = VElementNode | string
-
-interface VDOMBuilderOption {
-    attrs?: object
-    children?: Array<VNode>
-}
-
-const createElement = (
-    tagName: string,
-    options?: VDOMBuilderOption
-) => {
-    const attrs = options?.attrs || {}
-    const children = options?.children || []
-    return {
-        tagName: tagName,
-        attrs: attrs,
-        children: children
-    } as VNode
-}
-
-
-const renderElementNode = (vNode: VElementNode) => {
-    const $el = document.createElement(vNode.tagName)
-    Object
-        .keys(vNode.attrs)
-        .forEach(key => {
-            $el.setAttribute(key, (vNode.attrs as any)[key])
-        })
-    for (const child of vNode.children) {
-        $el.appendChild(render(child))
-    }
-    return $el
-}
-
-const renderTextNode = (vNode: string) => {
-    return document.createTextNode(vNode)
-}
-
-const render = (vNode: VNode) => {
-    if (typeof vNode === 'string') {
-        return renderTextNode(vNode)
-    }
-    return renderElementNode(vNode)
-}
-
-
-const mount = ($node: HTMLElement | Text, target: HTMLElement | Text | Element | null) => {
-    if (target) {
-        target.replaceWith($node)
-        return $node
-    } else {
-        throw "can't find target element,mount failed"
-    }
-
-}
+import { VElementNode, VNode, VDOMBuilderOption, DOMNodeType } from '../../VDOM.type'
+import { render } from '../Render/Render'
 
 const diff = (oldVTree: VNode, newVTree?: VNode) => {
     //if newVTree === undefined just remove the real dom node
     if (newVTree === undefined) {
-        return ($node: HTMLElement | Text) => {
+        return ($node: DOMNodeType) => {
             $node.remove()
             return undefined
         }
@@ -76,19 +17,19 @@ const diff = (oldVTree: VNode, newVTree?: VNode) => {
             both case just return a patch function that render newVTree
         */
         if (oldVTree !== newVTree) {
-            return ($node: HTMLElement | Text) => {
+            return ($node: DOMNodeType) => {
                 const $newNode = render(newVTree)
                 $node.replaceWith($newNode)
                 return $newNode
             }
         } else { //it means oldVTree and newVTree are both string type and they are equal
-            return ($node: HTMLElement | Text) => $node //just do nothing here
+            return ($node: DOMNodeType) => $node //just do nothing here
         }
     }
 
     if (oldVTree.tagName !== newVTree.tagName) {
         //in this case,oldVTree and newVTree are totally different VNodes
-        return ($node: HTMLElement | Text) => {
+        return ($node: DOMNodeType) => {
             const $newNode = render(newVTree)
             $node.replaceWith($newNode)
             return $newNode
@@ -98,7 +39,7 @@ const diff = (oldVTree: VNode, newVTree?: VNode) => {
     const patchAttrs = diffAttrs(oldVTree.attrs, newVTree.attrs)
     const patchChildren = diffChildren(oldVTree.children, newVTree.children)
 
-    return ($node: HTMLElement | Text) => {
+    return ($node: DOMNodeType) => {
         patchAttrs($node as HTMLElement)
         patchChildren($node)
         return $node
@@ -137,12 +78,12 @@ const diffAttrs = (oldAttrs: object, newAttrs: object) => {
 }
 
 const diffChildren = (oldVChildren: Array<VNode>, newVChildren: Array<VNode>) => {
-    const childPatches:any = []
+    const childPatches: any = []
     oldVChildren.forEach((oldVChild, i) => { //diff all oldVChild here
-        childPatches.push(diff(oldVChild,newVChildren[i]))
+        childPatches.push(diff(oldVChild, newVChildren[i]))
     })
 
-    const additionalPatches:Array<($node: HTMLElement | Text) => HTMLElement|Text> = []
+    const additionalPatches: Array<($node: DOMNodeType) => DOMNodeType> = []
     for (const additionalVChild of newVChildren.slice(oldVChildren.length)) {
         additionalPatches.push($node => {
             $node.appendChild(render(additionalVChild))
@@ -150,7 +91,7 @@ const diffChildren = (oldVChildren: Array<VNode>, newVChildren: Array<VNode>) =>
         })
     }
 
-    return ($parent: HTMLElement | Text) => {
+    return ($parent: DOMNodeType) => {
         $parent.childNodes.forEach(($child, i) => { //patch children
             childPatches[i]($child)
         })
@@ -162,5 +103,4 @@ const diffChildren = (oldVChildren: Array<VNode>, newVChildren: Array<VNode>) =>
     }
 }
 
-
-export { createElement, render, mount, diff }
+export { diff }
